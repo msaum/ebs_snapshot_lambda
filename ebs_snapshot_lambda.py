@@ -39,14 +39,14 @@ Demystifying EC2 Resource-Level Permissions
 
 __author__ = 'msaum'
 
-import boto3
-import logging
-from datetime import date, datetime
-import pytz
 import argparse
-import os
+import boto3
 import json
+import logging
+import os
+import pytz
 from ConfigParser import SafeConfigParser
+from datetime import date, datetime
 
 # -------------------------------------------------------------------------------
 # setup simple logging for INFO
@@ -142,7 +142,7 @@ def list_instances_by_tag_value(ec2client, tag_key, tag_value):
     return instancelist
 
 
-def list_volumes(ec2client, InstanceId):
+def list_volumes(ec2client, instance_id):
     '''Creates a list of volumes for an EC2 instance
     :param boto3 client ec2 object
     :return: A simple list of instances
@@ -152,15 +152,15 @@ def list_volumes(ec2client, InstanceId):
     volume_list = []
     response = ec2client.describe_instances(
         Filters=[
-            {'Name': 'instance-id', 'Values': [InstanceId]}
+            {'Name': 'instance-id', 'Values': [instance_id]}
         ]
     )
 
     for reservation in response["Reservations"]:
-        for Instances in reservation["Instances"]:
-            for BlockDeviceMappings in Instances["BlockDeviceMappings"]:
-                logging.debug(json.dumps(BlockDeviceMappings, indent=2, default=str))
-                volume_list.append(BlockDeviceMappings["Ebs"]["VolumeId"])
+        for instances in reservation["Instances"]:
+            for block_device_mappings in instances["BlockDeviceMappings"]:
+                logging.debug(json.dumps(block_device_mappings, indent=2, default=str))
+                volume_list.append(block_device_mappings["Ebs"]["VolumeId"])
     return volume_list
 
 
@@ -195,7 +195,8 @@ def snapshot_volid(ec2resource, vol_id, instance, aging_days):
             ec2resource.create_tags(
                 Resources=[new_snapshot.id],
                 Tags=[
-                    {'Key': 'Name', 'Value': '[' + instance + ']' + '[' + vol_id + '] ' + today.isoformat() + ' Snapshot'},
+                    {'Key': 'Name',
+                     'Value': '[' + instance + ']' + '[' + vol_id + '] ' + today.isoformat() + ' Snapshot'},
                     {'Key': 'Date', 'Value': today.isoformat()}
                 ])
     except Exception, e:
