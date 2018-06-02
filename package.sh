@@ -7,7 +7,7 @@
 ######################
 # exit_error()
 function exit_error() {
-    echo "** Falure: $1"
+    echo "** Failure: $1"
     exit 1
 }
 echo "* Begin packaging ebs_snapshot_lambda for AWS Lambda."
